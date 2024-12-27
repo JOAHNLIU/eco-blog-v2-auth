@@ -14,32 +14,34 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.verifyTokenMiddleware = void 0;
 const firebase_admin_1 = __importDefault(require("firebase-admin"));
-const verifyTokenMiddleware = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    const token = (_a = req.headers.authorization) === null || _a === void 0 ? void 0 : _a.split(' ')[1];
-    const isOptional = req.method === 'GET';
-    if (!token) {
-        if (isOptional) {
+const verifyTokenMiddleware = () => {
+    return (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+        var _a;
+        const token = (_a = req.headers.authorization) === null || _a === void 0 ? void 0 : _a.split(' ')[1];
+        const isOptional = req.method === 'GET';
+        if (!token) {
+            if (isOptional) {
+                req.userId = null;
+                next();
+                return;
+            }
+            res.status(401).json({ error: 'Token not provided' });
+            return;
+        }
+        try {
+            const decodedToken = yield firebase_admin_1.default.auth().verifyIdToken(token);
+            req.userId = decodedToken.uid;
+        }
+        catch (error) {
+            console.error('Token verification failed:', error);
+            if (!isOptional) {
+                res.status(401).json({ error: 'Invalid token' });
+                return;
+            }
             req.userId = null;
-            next();
-            return;
         }
-        res.status(401).json({ error: 'Token not provided' });
-        return;
-    }
-    try {
-        const decodedToken = yield firebase_admin_1.default.auth().verifyIdToken(token);
-        req.userId = decodedToken.uid;
-    }
-    catch (error) {
-        console.error('Token verification failed:', error);
-        if (!isOptional) {
-            res.status(401).json({ error: 'Invalid token' });
-            return;
-        }
-        req.userId = null;
-    }
-    next();
-});
+        next();
+    });
+};
 exports.verifyTokenMiddleware = verifyTokenMiddleware;
 //# sourceMappingURL=middleware.js.map
