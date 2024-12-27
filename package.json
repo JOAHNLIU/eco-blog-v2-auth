@@ -1,0 +1,26 @@
+{
+  "name": "eco-blog-v2-auth",
+  "version": "1.0.0",
+  "description": "Library for Firebase authentication and middleware integration",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JOAHNLIU/eco-blog-v2-auth.git"
+  },
+  "author": "Ioann Liubchenko",
+  "license": "MIT",
+  "dependencies": {
+    "firebase-admin": "^11.0.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^18.0.0",
+    "jest": "^29.0.0",
+    "@types/jest": "^29.0.0"
+  }
+}
