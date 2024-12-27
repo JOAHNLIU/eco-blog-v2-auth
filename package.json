@@ -1,6 +1,7 @@
 {
   "name": "eco-blog-v2-auth",
   "version": "1.0.0",
+  "type": "commonjs",
   "description": "Library for Firebase authentication and middleware integration",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
