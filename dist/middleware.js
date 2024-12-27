@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -7,8 +8,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import admin from 'firebase-admin';
-export const verifyTokenMiddleware = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.verifyTokenMiddleware = void 0;
+const firebase_admin_1 = __importDefault(require("firebase-admin"));
+const verifyTokenMiddleware = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const token = (_a = req.headers.authorization) === null || _a === void 0 ? void 0 : _a.split(' ')[1];
     const isOptional = req.method === 'GET';
@@ -22,7 +28,7 @@ export const verifyTokenMiddleware = (req, res, next) => __awaiter(void 0, void 
         return;
     }
     try {
-        const decodedToken = yield admin.auth().verifyIdToken(token);
+        const decodedToken = yield firebase_admin_1.default.auth().verifyIdToken(token);
         req.userId = decodedToken.uid;
     }
     catch (error) {
@@ -35,4 +41,5 @@ export const verifyTokenMiddleware = (req, res, next) => __awaiter(void 0, void 
     }
     next();
 });
+exports.verifyTokenMiddleware = verifyTokenMiddleware;
 //# sourceMappingURL=middleware.js.map
