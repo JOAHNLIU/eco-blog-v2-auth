@@ -1,48 +1,41 @@
-import { Request, Response, NextFunction } from "express";
-import { FirebaseAuthLibrary } from "./firebase";
+import { Request, Response, NextFunction } from 'express';
+import admin from 'firebase-admin';
 
-interface MiddlewareOptions {
-  authLibrary: FirebaseAuthLibrary;
-  findOrCreateUser: (uid: string, name?: string, email?: string) => Promise<any>;
-  updateUserLastLogin: (user: any) => Promise<void>;
+export interface CustomRequest extends Request {
+  userId?: string | null;
 }
 
-export function createAuthMiddleware(options: MiddlewareOptions) {
-  return async (req: Request, res: Response, next: NextFunction) => {
-    const token = req.headers.authorization?.split(" ")[1];
-    const isOptional = req.method === "GET";
+export const verifyTokenMiddleware = async (
+  req: CustomRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  const token = req.headers.authorization?.split(' ')[1];
+  const isOptional = req.method === 'GET';
 
-    if (!token) {
-      if (isOptional) {
-        req.userId = null;
-        return next();
-      }
-      return res.status(401).json({ error: "Token not provided" });
-    }
-
-    try {
-      const decodedToken = await options.authLibrary.verifyToken(token);
-      req.userId = decodedToken.uid;
-
-      const [user] = await options.findOrCreateUser(
-        decodedToken.uid,
-        decodedToken.name || "Anonymous",
-        decodedToken.email || null
-      );
-
-      if (user) {
-        await options.updateUserLastLogin(user);
-      }
-    } catch (error) {
-      console.error("Token verification failed:", error);
-
-      if (!isOptional) {
-        return res.status(401).json({ error: "Invalid token" });
-      }
-
+  if (!token) {
+    if (isOptional) {
       req.userId = null;
+      next();
+      return;
+    }
+    res.status(401).json({ error: 'Token not provided' });
+    return;
+  }
+
+  try {
+    const decodedToken = await admin.auth().verifyIdToken(token);
+    req.userId = decodedToken.uid;
+  } catch (error) {
+    console.error('Token verification failed:', error);
+
+    if (!isOptional) {
+      res.status(401).json({ error: 'Invalid token' });
+      return;
     }
 
-    next();
-  };
-}
+    req.userId = null;
+  }
+
+  next();
+};

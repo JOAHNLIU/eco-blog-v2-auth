@@ -1,24 +1,20 @@
-import * as admin from "firebase-admin";
+import admin from 'firebase-admin';
 
-interface FirebaseLibraryOptions {
-  firebaseConfig: admin.ServiceAccount;
-}
-
-export class FirebaseAuthLibrary {
-  constructor(options: FirebaseLibraryOptions) {
-    if (!admin.apps.length) {
-      admin.initializeApp({
-        credential: admin.credential.cert(options.firebaseConfig),
-      });
-    }
+export function initializeFirebase(firebaseConfigBase64: string): admin.app.App {
+  if (!firebaseConfigBase64) {
+    throw new Error('FIREBASE_CONFIG is not set in environment variables.');
   }
 
-  public async verifyToken(token: string): Promise<admin.auth.DecodedIdToken> {
-    try {
-      const decodedToken = await admin.auth().verifyIdToken(token);
-      return decodedToken;
-    } catch (error) {
-      throw new Error("Invalid or expired token");
-    }
+  const firebaseConfig = JSON.parse(
+    Buffer.from(firebaseConfigBase64, 'base64').toString('utf8')
+  );
+
+  if (!admin.apps.length) {
+    admin.initializeApp({
+      credential: admin.credential.cert(firebaseConfig),
+      databaseURL: firebaseConfig.databaseURL,
+    });
   }
+
+  return admin.app();
 }
